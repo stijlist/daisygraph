@@ -24,24 +24,20 @@
     }) : u(t, 'ratio', 1)
   }
 
-  // the only interesting thing that happens here is updating length, and
-  // there's tons of apparent parameter coupling to daisygraph and 
-  // the contents of 'children'... there's probably a more elegant way to
-  // split this up
-  var gen_arc = function (ratio, parent_length, start_angle, radius) {
-    return { start_angle: start_angle, 
-             length: (ratio ? ratio : 1) * parent_length,
-             radius: radius }
-  }
-  // a convoluted, incorrect, mess
-  var daisygraph = function (root, parent_length, start_angle, radius) {
-    return [
-      gen_arc(root.ratio, parent_length, start_angle, radius)
-    ].concat(root.children.reduce(function (m, c) {
-      var arc = gen_arc(c.ratio, parent_length, m.angle, radius) // this gets computed again in daisygraph(c) call below
-      var new_arcs = c.children ? daisygraph(c, parent_length, m.angle, radius) : [arc]
-      return { arcs: m.arcs.concat(new_arcs), angle: m.angle + arc.length }
-    }, { angle: start_angle, arcs: [] }).arcs)
+  var daisygraph = function (root, radius, parent_length, start_angle) {
+    var root_arc = { 
+      start_angle: (start_angle || 0), 
+           length: (root.ratio || 1) * (parent_length || 360),
+           radius: (radius || 1)
+    }
+
+    var child_arcs = root.children ? root.children.reduce(function (m, c) {
+      var sub_dg = daisygraph(c, radius + 1, root_arc.length, m.angle)
+      var child_arc = sub_dg[0]
+      return { arcs: m.arcs.concat(sub_dg), angle: m.angle + child_arc.length }
+    }, { angle: root_arc.start_angle, arcs: [] }).arcs : []
+
+    return [root_arc].concat(child_arcs)
   }
 
   var main_loop = function () {
@@ -60,7 +56,7 @@
         } 
       ] 
     })
-    var dg = daisygraph(rs, 360, 0, 1)
+    var dg = daisygraph(rs, 1, 360, 0)
     render(document.querySelector('#target'), JSON.stringify(dg))
     // we don't need animation yet
     // requestAnimationFrame(main_loop)
