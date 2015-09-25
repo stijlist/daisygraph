@@ -3,6 +3,21 @@
   var html = function () { return "<p> Hello World </p>" }
   var render = function (target, string) { target.innerHTML = string }
   
+  var state = { 
+      name: 'thing', 
+      value: 10, 
+      children: [ 
+        { name: 'a', value: 5 },
+        { 
+          name: 'b', 
+          value: 5,
+          children: [ 
+            { name: 'x', value: 2 },
+            { name: 'y', value: 3 } 
+          ] 
+        } 
+      ] 
+    }
 
   var clone = function (obj) {
     var res = {}
@@ -40,24 +55,18 @@
     return [root_arc].concat(child_arcs)
   }
 
+  // var path = '<path fill="none" stroke="#333333" stroke-width="3" d="M65,10 a50,25 0 1,0 50,25" />'
+  var path = '<rect width="200" height="100" fill="#BBC42A" />'
+
+  var SVG = function (el, paths) {
+    el.textContent = paths
+  }
+
   var main_loop = function () {
-    var rs = ratios({ 
-      name: 'thing', 
-      value: 10, 
-      children: [ 
-        { name: 'a', value: 5 },
-        { 
-          name: 'b', 
-          value: 5,
-          children: [ 
-            { name: 'x', value: 2 },
-            { name: 'y', value: 3 } 
-          ] 
-        } 
-      ] 
-    })
+    var rs = ratios(state)
     var dg = daisygraph(rs, 1, 360, 0)
     render(document.querySelector('#target'), JSON.stringify(dg))
+    SVG(document.querySelector('svg'), path)
     // we don't need animation yet
     // requestAnimationFrame(main_loop)
   }
