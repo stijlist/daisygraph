@@ -1,7 +1,9 @@
 daisygraph
 ---
 
-visualize nested cumulative data
+an implementation of sunburst charts, for visualizing nested cumulative data
+
+(another implementation: http://bl.ocks.org/mbostock/4063423)
 
 usage:
 
